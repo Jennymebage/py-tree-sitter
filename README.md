@@ -297,7 +297,48 @@ To try out and explore the code referenced in this README, check out [examples/u
 
 [tree-sitter]: https://tree-sitter.github.io/tree-sitter/
 [issue]: https://github.com/tree-sitter/py-tree-sitter/issues/new
-[tree-sitter-python]: https://github.com/tree-sitter/tree-sitter-python
+[tree-sitter-python]: https://github.com/tree-sitter/tree-sitter-pythonroot_node = tree.root_node
+assert root_node.type == 'module'
+assert root_node.start_point == (1, 0)
+assert root_node.end_point == (4, 0)
+
+function_node = root_node.children[0]
+assert function_node.type == 'function_definition'
+assert function_node.child_by_field_name('name').type == 'identifier'
+
+function_name_node = function_node.children[1]
+assert function_name_node.type == 'identifier'
+assert function_name_node.start_point == (1, 4)
+assert function_name_node.end_point == (1, 7)
+
+function_body_node = function_node.child_by_field_name("body")
+
+if_statement_node = function_body_node.child(0)
+assert if_statement_node.type == "if_statement"
+
+function_call_node = if_statement_node.child_by_field_name("consequence").child(0).child(0)
+assert function_call_node.type == "call"
+
+function_call_name_node = function_call_node.child_by_field_name("function")
+assert function_call_name_node.type == "identifier"
+
+function_call_args_node = function_call_node.child_by_field_name("arguments")
+assert function_call_args_node.type == "argument_list"
+
+
+assert str(root_node) == (
+    "(module "
+        "(function_definition "
+            "name: (identifier) "
+            "parameters: (parameters) "
+            "body: (block "
+                "(if_statement "
+                    "condition: (identifier) "
+                    "consequence: (block "
+                        "(expression_statement (call "
+                            "function: (identifier) "
+                            "arguments: (argument_list))))))))"
+)
 [tree query]: https://tree-sitter.github.io/tree-sitter/using-parsers/queries
 [ci]: https://img.shields.io/github/actions/workflow/status/tree-sitter/py-tree-sitter/ci.yml?logo=github&label=CI
 [pypi]: https://img.shields.io/pypi/v/tree-sitter?logo=pypi&logoColor=ffd242&label=PyPI
